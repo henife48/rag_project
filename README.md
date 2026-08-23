@@ -1,3 +1,4 @@
+<img width="1891" height="872" alt="Ekran görüntüsü 2026-08-24 005949" src="https://github.com/user-attachments/assets/eaf09355-81f9-4932-b497-2c58bba94de2" />
 # 📚 StudyMate
 
 ### AI-Powered Academic Study Assistant
