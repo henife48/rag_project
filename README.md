@@ -2,7 +2,6 @@
 
 # AI-Powered Academic Study Assistant
 
-[svg](https://github.com/henife48/rag_project#ai-powered-academic-study-assistant)
 
 StudyMate is a **RAG-based academic study assistant** that allows students to upload their course documents, ask questions based on these materials, study with flashcards, and track their study performance.
 
@@ -10,7 +9,6 @@ StudyMate is a **RAG-based academic study assistant** that allows students to up
 
 ## ✨ Features
 
-[svg](https://github.com/henife48/rag_project#-features)
 
 * 📄 **Document Upload** — Upload PDF, TXT, and Markdown files
 * 🤖 **AI Tutor** — Ask questions and get answers based on course content
@@ -24,7 +22,6 @@ StudyMate is a **RAG-based academic study assistant** that allows students to up
 
 ## 🧠 How It Works
 
-[svg](https://github.com/henife48/rag_project#-how-it-works)
 
 StudyMate processes uploaded course documents and uses relevant content when answering user questions.
 
@@ -53,7 +50,6 @@ This structure focuses on helping students study using **their own course materi
 
 ## 🛠️ Tech Stack
 
-[svg](https://github.com/henife48/rag_project#%EF%B8%8F-tech-stack)
 
 * **Python**
 * **Flask**
@@ -66,8 +62,6 @@ This structure focuses on helping students study using **their own course materi
 ---
 
 ## 📂 Project Structure
-
-[svg](https://github.com/henife48/rag_project#-project-structure)
 
 ```text
 rag_project/
@@ -90,11 +84,9 @@ rag_project/
 
 ## 🚀 Installation
 
-[svg](https://github.com/henife48/rag_project#-installation)
 
 ### 1. Clone the repository
 
-[svg](https://github.com/henife48/rag_project#1-clone-the-repository)
 
 ```bash
 git clone https://github.com/henife48/rag_project.git
@@ -105,7 +97,6 @@ cd rag_project
 
 ### 2. Install dependencies
 
-[svg](https://github.com/henife48/rag_project#2-install-dependencies)
 
 ```bash
 pip install -r requirements.txt
@@ -115,7 +106,6 @@ pip install -r requirements.txt
 
 ### 3. Run the application
 
-[svg](https://github.com/henife48/rag_project#3-run-the-application)
 
 ```bash
 python app.py
@@ -136,7 +126,6 @@ http://127.0.0.1:5000
 
 ## 📌 Project Status
 
-[svg](https://github.com/henife48/rag_project#-project-status)
 
 **Completed MVP**
 
