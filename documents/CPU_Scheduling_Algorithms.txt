@@ -1,0 +1,23 @@
+BÖLÜM 3: CPU ZAMANLAMA ALGORİTMALARI VE PERFORMANS KRİTERLERİ
+
+1. Temel Kavramlar ve Metrikler
+• CPU Burst Time: Bir sürecin CPU'da çalışması için gereken net süre.
+• Turnaround Time: Sürecin sisteme girişinden tamamlanmasına kadar geçen toplam süre (Turnaround = Completion - Arrival).
+• Waiting Time: Sürecin hazır kuyruğunda (Ready Queue) CPU bekleyerek geçirdiği toplam süre.
+• Preemptive (Kesintili): CPU'nun çalışan bir süreçten zorla alınıp öncelikli başka bir sürece verilebilmesi.
+• Non-Preemptive (Kesintisiz): Süreç CPU'yu kendi isteğiyle (I/O veya bitiş) bırakana kadar CPU'da kalması.
+
+2. Zamanlama Algoritmaları
+• FCFS (First-Come, First-Served):
+  - İlk gelen ilk çalışır. Kesintisizdir.
+  - Dezavantajı: Convoy Effect (Kısa işlemlerin uzun bir işlem arkasında beklemesi).
+
+• SJF (Shortest Job First) & SRTF (Shortest Remaining Time First):
+  - CPU patlama süresi en kısa olan sürece öncelik verir.
+  - Minimum ortalama bekleme süresi açısından matematiksel olarak optimaldir.
+  - Kesintili versiyonuna SRTF denir. Uzun işlemler açlık (Starvation) tehlikesi yaşayabilir.
+
+• Round Robin (RR):
+  - Her sürece sabit bir zaman dilimi (Time Quantum - q) verilir.
+  - Süre dolduğunda süreç kesilir ve hazır kuyruğunun sonuna gönderilir.
+  - İnteraktif sistemler ve duyarlılık (Responsiveness) için temel algoritmadır. Quantum çok büyükse FCFS'e döner, çok küçükse bağlam değiştirme (context switch) yükü artar.

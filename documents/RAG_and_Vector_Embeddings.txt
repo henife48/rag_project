@@ -1,0 +1,16 @@
+BÖLÜM 2: RETRIEVAL-AUGMENTED GENERATION (RAG) MİMARİSİ VE VEKTÖR VERİTABANLARI
+
+1. RAG (Retrieval-Augmented Generation) Nedir?
+• Tanım: Büyük Dil Modellerinin (LLM) eğitim verilerinde bulunmayan özel belgeler veya güncel bilgilerle beslenmesini sağlayan hibrit bir yapay zekâ mimarisidir.
+• Modelin halüsinasyon (yanlış bilgi uydurma) riskini minimize eder ve yanıtlara kaynak referansı kazandırır.
+
+2. RAG Pipeline Adımları
+• Parçalama (Chunking): Uzun PDF veya dokümanların semantik bütünlüğü bozulmadan küçük metin bloklarına (örn. 500 token) bölünmesi.
+• Gömme (Embedding): Metin parçalarının Transformer tabanlı encoder modelleri ile çok boyutlu yoğun vektörlere (dense vector) dönüştürülmesi.
+• İndeksleme ve Vektör Veritabanı: Üretilen vektörlerin FAISS, ChromaDB veya Pinecone gibi veritabanlarında saklanması.
+• Geri Getirme (Retrieval): Kullanıcı sorusu vektöre dönüştürülür ve Cosine Similarity veya Dot Product ile en yakın K adet metin parçası (Top-K) bulunur.
+• Üretim (Generation): Bulunan bağlam parçaları ve kullanıcı sorusu tek bir prompt altında birleştirilerek LLM'e gönderilir ve nihai yanıt üretilir.
+
+3. Benzerlik Metrikleri
+• Kosinüs Benzerliği (Cosine Similarity): İki vektör arasındaki açının kosinüsünü ölçer. Vektör uzunluğundan bağımsız semantik yönü kıyaslar.
+• Öklid Mesafesi (Euclidean Distance / L2): İki vektör arasındaki geometrik mesafeyi ölçer.

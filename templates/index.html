@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyMate — AI Study Assistant</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,500;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              bg: '#141210',
+              sidebar: '#0d0b0a',
+              card: '#1c1917',
+              cardHigh: '#26221f',
+              border: '#292524',
+              accent: '#ffd7a9',
+              accentHover: '#ffc885',
+              textMuted: '#d6c3b0'
+            }
+          },
+          fontFamily: {
+            serif: ['Newsreader', 'serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #141210; color: #eae1dd; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .serif-title { font-family: 'Newsreader', serif; }
+    .glowing-card:hover { border-color: #ffd7a9; box-shadow: 0 0 20px rgba(255, 215, 169, 0.08); transition: all 0.2s ease; }
+    .custom-scroll::-webkit-scrollbar { width: 5px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #292524; border-radius: 4px; }
+  </style>
+</head>
+<body class="flex h-screen overflow-hidden text-sm">
+
+  <!-- SIDEBAR -->
+  <aside class="w-64 bg-[#0d0b0a] border-r border-brand-border flex flex-col justify-between p-5 select-none z-30">
+    <div>
+      <div class="flex items-center gap-3 px-2 py-3 mb-6 cursor-pointer" onclick="switchTab('dashboard')">
+        <span class="material-symbols-outlined text-brand-accent text-3xl">auto_stories</span>
+        <div>
+          <h1 class="serif-title text-2xl font-bold text-brand-accent tracking-wide">StudyMate</h1>
+          <p class="text-[10px] tracking-wider text-brand-textMuted/70 uppercase">Peaceful focus mode</p>
+        </div>
+      </div>
+
+      <nav class="space-y-1.5">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all bg-brand-card text-brand-accent border border-brand-border/60">
+          <span class="material-symbols-outlined text-xl">dashboard</span> Dashboard
+        </button>
+        <button onclick="switchTab('documents')" id="nav-documents" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all text-brand-textMuted hover:text-white hover:bg-brand-card/50">
+          <span class="material-symbols-outlined text-xl">description</span> Documents
+        </button>
+        <button onclick="switchTab('aitutor')" id="nav-aitutor" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all text-brand-textMuted hover:text-white hover:bg-brand-card/50">
+          <span class="material-symbols-outlined text-xl">psychology</span> AI Tutor
+        </button>
+        <button onclick="switchTab('flashcards')" id="nav-flashcards" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all text-brand-textMuted hover:text-white hover:bg-brand-card/50">
+          <span class="material-symbols-outlined text-xl">menu_book</span> Study Center
+        </button>
+      </nav>
+    </div>
+
+    <div class="space-y-2 pt-4 border-t border-brand-border">
+      <button onclick="switchTab('profile')" id="nav-profile" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-brand-card/60 transition group border border-transparent">
+        <div id="sidebar-avatar" class="w-10 h-10 rounded-full bg-brand-accent/20 border border-brand-accent/40 flex items-center justify-center text-brand-accent font-bold text-sm group-hover:border-brand-accent">
+          CE
+        </div>
+        <div class="truncate flex-1">
+          <div id="sidebar-username" class="font-medium text-white group-hover:text-brand-accent truncate">Computer Engineer</div>
+          <div id="sidebar-major" class="text-brand-textMuted text-[11px] truncate">Profili Düzenle &rarr;</div>
+        </div>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 flex flex-col overflow-y-auto bg-brand-bg relative">
+    
+    <!-- HEADER -->
+    <header class="h-16 border-b border-brand-border/80 flex items-center justify-end px-8 bg-brand-bg/90 backdrop-blur sticky top-0 z-20">
+      <div class="flex items-center gap-4 relative">
+        <div class="flex items-center gap-2 bg-brand-card border border-brand-border px-3.5 py-1.5 rounded-full text-xs text-brand-accent font-medium">
+          <span class="material-symbols-outlined text-amber-500 text-sm" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+          <span id="top-streak">12 Gün Seri</span>
+        </div>
+
+        <div class="relative">
+          <button onclick="toggleNotifications(event)" class="relative w-9 h-9 rounded-full bg-brand-card border border-brand-border flex items-center justify-center text-brand-textMuted hover:text-white hover:border-brand-accent/50 transition">
+            <span class="material-symbols-outlined text-xl">notifications</span>
+            <span id="notif-badge" class="absolute top-1 right-1 w-2.5 h-2.5 bg-amber-500 rounded-full ring-2 ring-brand-bg animate-pulse"></span>
+          </button>
+
+          <div id="notif-dropdown" class="hidden absolute right-0 mt-3 w-80 bg-brand-card border border-brand-border rounded-2xl shadow-2xl p-4 z-50 space-y-3">
+            <div class="flex items-center justify-between border-b border-brand-border/60 pb-2">
+              <span class="text-xs font-semibold text-white">Bildirimler</span>
+              <button onclick="markAllNotificationsRead()" class="text-[11px] text-brand-accent hover:underline">Tümünü Oku</button>
+            </div>
+            <div class="space-y-2.5">
+              <div class="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-start gap-3">
+                <span class="material-symbols-outlined text-amber-500 text-2xl" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+                <div class="text-xs">
+                  <div class="font-semibold text-amber-300">12 Günlük Serini Unutma! 🔥</div>
+                  <div class="text-stone-300 text-[11px] mt-0.5 leading-snug">Bugün 15 dakikalık bir çalışma yaparak serini koru.</div>
+                  <div class="text-[10px] text-amber-400/70 mt-1">15 dakika önce</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="p-8 max-w-7xl w-full mx-auto space-y-8">
+
+      <!-- 1. DASHBOARD -->
+      <section id="view-dashboard" class="view-section space-y-8">
+        <div>
+          <!-- DİNAMİK SAAT SELAMLAMASI -->
+          <h2 id="dynamic-greeting-title" class="serif-title text-4xl text-brand-accent mb-2">Good evening 👋</h2>
+          <p id="dynamic-greeting-subtitle" class="text-brand-textMuted text-base">Ready to make some progress?</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div class="lg:col-span-8 space-y-8">
+            <div id="dashboard-recommendation-box"></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div class="bg-brand-card rounded-2xl p-6 border border-brand-border text-center glowing-card">
+                <span class="material-symbols-outlined text-brand-accent text-3xl mb-2" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+                <p class="text-[11px] font-semibold text-brand-textMuted uppercase tracking-wider mb-1">STUDY STREAK</p>
+                <p class="serif-title text-3xl text-white font-bold" id="kpi-streak">12 <span class="text-xs font-sans text-brand-textMuted font-normal">days</span></p>
+              </div>
+
+              <div class="bg-brand-card rounded-2xl p-6 border border-brand-border text-center glowing-card">
+                <span class="material-symbols-outlined text-brand-accent text-3xl mb-2">task_alt</span>
+                <p class="text-[11px] font-semibold text-brand-textMuted uppercase tracking-wider mb-1">QUESTIONS ANSWERED</p>
+                <p class="serif-title text-3xl text-white font-bold" id="kpi-questions">0</p>
+              </div>
+
+              <div class="bg-brand-card rounded-2xl p-6 border border-brand-border text-center glowing-card">
+                <span class="material-symbols-outlined text-brand-accent text-3xl mb-2">schedule</span>
+                <p class="text-[11px] font-semibold text-brand-textMuted uppercase tracking-wider mb-1">STUDY TIME</p>
+                <p class="serif-title text-3xl text-white font-bold" id="kpi-time">0s 0dk</p>
+              </div>
+            </div>
+
+            <div>
+              <h3 class="serif-title text-2xl text-white mb-4">Continue Learning</h3>
+              <div id="dashboard-courses-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-4 space-y-6">
+            <h3 class="serif-title text-2xl text-white">Quick Actions</h3>
+            <div class="space-y-3">
+              <button onclick="switchTab('aitutor')" class="w-full flex items-center gap-4 bg-brand-card hover:bg-brand-cardHigh p-4 rounded-2xl border border-brand-border transition text-left">
+                <div class="bg-brand-accent/10 p-3 rounded-xl text-brand-accent"><span class="material-symbols-outlined">smart_toy</span></div>
+                <div><h4 class="font-semibold text-white">Ask AI Tutor</h4><p class="text-xs text-brand-textMuted">Tüm PDF'lerine soru sor</p></div>
+              </button>
+              <button onclick="switchTab('flashcards')" class="w-full flex items-center gap-4 bg-brand-card hover:bg-brand-cardHigh p-4 rounded-2xl border border-brand-border transition text-left">
+                <div class="bg-brand-accent/10 p-3 rounded-xl text-brand-accent"><span class="material-symbols-outlined">style</span></div>
+                <div><h4 class="font-semibold text-white">Study Flashcards</h4><p class="text-xs text-brand-textMuted">Akademik kartları çöz</p></div>
+              </button>
+              <button onclick="switchTab('documents')" class="w-full flex items-center gap-4 bg-brand-card hover:bg-brand-cardHigh p-4 rounded-2xl border border-brand-border transition text-left">
+                <div class="bg-brand-accent/10 p-3 rounded-xl text-brand-accent"><span class="material-symbols-outlined">cloud_upload</span></div>
+                <div><h4 class="font-semibold text-white">Upload Documents</h4><p class="text-xs text-brand-textMuted">Yeni PDF veya not ekle</p></div>
+              </button>
+            </div>
+
+            <!-- GÜNCELLENMİŞ ÖZEL DİNAMİK GÖRSEL & MOTİVASYON KARTI -->
+            <div id="quote-card" class="relative rounded-3xl overflow-hidden border border-brand-border glowing-card p-6 min-h-[240px] flex flex-col justify-end bg-cover bg-center transition-all duration-700 shadow-2xl">
+              <div class="absolute inset-0 bg-gradient-to-t from-black via-black/65 to-black/30 pointer-events-none"></div>
+              
+              <div class="relative z-10 space-y-1.5">
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-black/50 border border-brand-accent/30 backdrop-blur-sm">
+                  <span class="w-1.5 h-1.5 rounded-full bg-brand-accent animate-pulse"></span>
+                  <p id="quote-tag" class="text-[9px] font-bold uppercase tracking-widest text-brand-accent">LATE NIGHT CODING</p>
+                </div>
+                <p id="quote-text" class="serif-title text-sm text-white italic leading-relaxed">“Kimse görmese de kendin için devam et.”</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. DOCUMENTS -->
+      <section id="view-documents" class="view-section hidden space-y-8">
+        <div>
+          <h2 class="serif-title text-4xl text-brand-accent mb-2">My Documents</h2>
+          <p class="text-brand-textMuted text-base">İstediğin kadar PDF veya ders belgesi yükleyebilir, dilediğini silebilirsin.</p>
+        </div>
+
+        <div class="border-2 border-dashed border-brand-border hover:border-brand-accent/50 rounded-3xl p-8 text-center bg-brand-card/40 transition flex flex-col items-center justify-center gap-4">
+          <div class="w-14 h-14 rounded-full bg-brand-accent/10 border border-brand-accent/30 flex items-center justify-center text-brand-accent text-3xl">
+            <span class="material-symbols-outlined text-3xl">cloud_upload</span>
+          </div>
+          <div>
+            <h3 class="serif-title text-xl text-white font-medium">Yeni Ders PDF'i Ekle</h3>
+            <p class="text-xs text-brand-textMuted mt-1">Dosyayı seç ve 'Yükle' butonuna tıkla.</p>
+          </div>
+
+          <div class="flex flex-col sm:flex-row items-center gap-3 w-full max-w-md mt-2">
+            <input type="file" id="fileInput" multiple accept=".pdf,.txt,.md" class="w-full text-xs text-brand-textMuted file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-brand-cardHigh file:text-brand-accent hover:file:bg-brand-border cursor-pointer bg-brand-bg p-2 rounded-xl border border-brand-border">
+            <button type="button" onclick="uploadSelectedFiles()" id="upload-btn" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-brand-accent text-black font-semibold text-xs hover:bg-brand-accentHover transition shadow-lg whitespace-nowrap">
+              Yükle &rarr;
+            </button>
+          </div>
+          <div id="upload-status" class="text-xs text-brand-accent font-medium hidden">Yükleniyor ve işleniyor, lütfen bekleyin...</div>
+        </div>
+
+        <div>
+          <h3 class="serif-title text-2xl text-white mb-4">Tüm Yüklü Belgeler</h3>
+          <div id="documents-grid" class="grid grid-cols-1 md:grid-cols-3 gap-5"></div>
+        </div>
+      </section>
+
+      <!-- 3. FLASHCARDS -->
+      <section id="view-flashcards" class="view-section hidden space-y-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-brand-border/60 pb-4">
+          <div>
+            <h2 class="serif-title text-4xl text-brand-accent mb-1">Study Center</h2>
+            <p class="text-brand-textMuted text-xs">Çalışmak istediğin dersi seç (Her tur 5 kaliteli soru içerir).</p>
+          </div>
+          
+          <div class="flex items-center gap-3 flex-wrap">
+            <select id="flashcard-doc-select" onchange="onDocFilterChange()" class="bg-[#171513] border border-brand-border text-white text-xs rounded-xl px-4 py-2.5 focus:outline-none focus:border-brand-accent">
+              <option value="all">📚 Tüm Yüklü Dersler</option>
+            </select>
+
+            <button onclick="reshuffleDeck()" id="btn-shuffle" class="px-4 py-2.5 bg-brand-card hover:bg-brand-cardHigh border border-brand-border rounded-xl text-xs font-semibold text-brand-accent flex items-center gap-2 transition glowing-card">
+              <span class="material-symbols-outlined text-sm">shuffle</span> Soruları Değiştir (5 Yeni Soru)
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 bg-brand-card border border-brand-border rounded-3xl p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-brand-border/60 pb-4">
+              <div>
+                <span class="text-xs font-semibold uppercase tracking-wider text-brand-accent" id="deck-topic-title">DERS ÇALIŞMA KARTLARI</span>
+                <p class="text-[11px] text-brand-textMuted mt-0.5">Sınav & Kavram Havuzu</p>
+              </div>
+              <div class="text-xs text-brand-textMuted bg-brand-border px-3.5 py-1.5 rounded-full font-medium" id="card-counter">Kart: 1 / 5</div>
+            </div>
+
+            <div id="flashcard-box" onclick="flipCard()" class="min-h-[280px] bg-[#171513] border border-brand-border/80 hover:border-brand-accent/50 rounded-2xl p-8 flex flex-col justify-between cursor-pointer transition select-none shadow-xl">
+              <div class="text-xs text-brand-textMuted uppercase flex items-center justify-between">
+                <span id="card-label" class="font-semibold text-brand-accent">Soru (Cevap için tıkla)</span>
+                <span class="material-symbols-outlined text-sm text-brand-textMuted">sync</span>
+              </div>
+              
+              <div id="card-content" class="serif-title text-2xl text-white text-center py-6 leading-relaxed font-normal">
+                Yükleniyor...
+              </div>
+
+              <div class="text-center text-[11px] text-brand-textMuted flex items-center justify-center gap-1.5">
+                <span class="material-symbols-outlined text-xs">touch_app</span> Cevabı görmek için karta dokun
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between gap-4 pt-2">
+              <button onclick="rateCard(false)" class="flex-1 py-4 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-500/10 font-semibold text-xs transition flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-base">close</span> Bilemedim
+              </button>
+              <button onclick="rateCard(true)" class="flex-1 py-4 rounded-xl bg-emerald-600/20 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-600/30 font-semibold text-xs transition flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-base">check</span> Bildim (+1)
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-brand-card border border-brand-border rounded-3xl p-6 space-y-4">
+            <h4 class="serif-title text-xl text-white">Must Know Topics</h4>
+            <div class="space-y-2.5">
+              <div class="p-3.5 bg-brand-bg rounded-xl border border-brand-border flex items-center justify-between text-xs">
+                <span class="font-medium text-white">🔥 Tip Sistemleri ve Güvenlik</span>
+                <span class="text-brand-accent font-semibold">Önemli</span>
+              </div>
+              <div class="p-3.5 bg-brand-bg rounded-xl border border-brand-border flex items-center justify-between text-xs">
+                <span class="font-medium text-white">🔥 Threads & Concurrency</span>
+                <span class="text-brand-accent font-semibold">Must Know</span>
+              </div>
+              <div class="p-3.5 bg-brand-bg rounded-xl border border-brand-border flex items-center justify-between text-xs">
+                <span class="font-medium text-white">⭐ İşletim Sistemi Mimarisi</span>
+                <span class="text-brand-accent font-semibold">Temel</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. AI TUTOR -->
+      <section id="view-aitutor" class="view-section hidden space-y-6">
+        <div>
+          <h2 class="serif-title text-4xl text-brand-accent mb-2">AI Tutor</h2>
+          <p class="text-brand-textMuted text-base">Yüklediğin tüm PDF'lere dair sorular sor.</p>
+        </div>
+
+        <div class="bg-brand-card border border-brand-border rounded-3xl p-6 h-[520px] flex flex-col justify-between">
+          <div id="chat-messages" class="overflow-y-auto space-y-4 pr-2 custom-scroll">
+            <div class="flex items-start gap-3">
+              <div class="w-8 h-8 rounded-full bg-brand-accent/20 text-brand-accent flex items-center justify-center text-xs font-bold">AI</div>
+              <div class="bg-[#171513] border border-brand-border p-4 rounded-2xl max-w-xl text-xs text-stone-200">
+                Merhaba! Yüklediğin tüm ders belgeleri üzerinden sorularını yanıtlayabilirim.
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-brand-border flex items-center gap-3">
+            <input type="text" id="tutor-input" placeholder="PDF hakkında soru sor..." class="flex-1 bg-brand-bg border border-brand-border rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-accent" onkeydown="if(event.key==='Enter') sendTutorQuestion()">
+            <button onclick="sendTutorQuestion()" class="px-5 py-3 bg-brand-accent text-black rounded-xl font-semibold text-xs hover:bg-brand-accentHover transition">
+              <span class="material-symbols-outlined text-base">arrow_upward</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. PROFILE -->
+      <section id="view-profile" class="view-section hidden space-y-8">
+        <div>
+          <h2 class="serif-title text-4xl text-brand-accent mb-2">My Profile</h2>
+          <p class="text-brand-textMuted text-base">Hesap bilgilerini düzenle.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div class="lg:col-span-4 space-y-6">
+            <div class="bg-brand-card border border-brand-border rounded-3xl p-8 flex flex-col items-center text-center">
+              <div id="profile-card-initials" class="w-24 h-24 rounded-full bg-brand-accent/20 border-2 border-brand-accent flex items-center justify-center text-brand-accent text-3xl font-bold mb-4 shadow-[0_0_25px_rgba(255,215,169,0.2)]">CE</div>
+              <h3 class="serif-title text-2xl text-white font-medium" id="profile-card-name">Computer Engineer</h3>
+              <p class="text-xs text-brand-textMuted mt-1" id="profile-card-email">student@university.edu</p>
+            </div>
+          </div>
+
+          <div class="lg:col-span-8">
+            <div class="bg-brand-card border border-brand-border rounded-3xl p-8 space-y-6">
+              <h3 class="serif-title text-2xl text-white border-b border-brand-border/60 pb-4">Profil Bilgilerini Güncelle</h3>
+              <form onsubmit="handleProfileUpdate(event)" class="space-y-5">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div>
+                    <label class="block text-xs font-semibold text-brand-textMuted mb-2">Ad Soyad</label>
+                    <input type="text" id="input-name" class="w-full bg-brand-bg border border-brand-border rounded-xl px-4 py-3 text-xs text-white" value="Computer Engineer" required>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-brand-textMuted mb-2">E-Posta</label>
+                    <input type="email" id="input-email" class="w-full bg-brand-bg border border-brand-border rounded-xl px-4 py-3 text-xs text-white" value="student@university.edu" required>
+                  </div>
+                </div>
+                <div class="pt-3 flex justify-end">
+                  <button type="submit" class="px-6 py-3 rounded-xl bg-brand-accent text-black font-semibold text-xs">Bilgileri Kaydet</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- KART MODALI -->
+  <div id="feedback-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-brand-card border border-brand-accent/40 rounded-3xl p-8 max-w-md w-full mx-4 text-center space-y-6 shadow-2xl">
+      <div class="w-16 h-16 rounded-full bg-brand-accent/20 border border-brand-accent flex items-center justify-center text-brand-accent text-3xl mx-auto">🏆</div>
+      <div>
+        <h3 class="serif-title text-3xl text-white font-medium">Oturum Tamamlandı!</h3>
+        <p id="modal-feedback-text" class="text-stone-300 text-xs mt-3 leading-relaxed">Tebrikler!</p>
+      </div>
+      <div class="bg-[#171513] border border-brand-border rounded-2xl p-4 flex items-center justify-around">
+        <div>
+          <div class="text-2xl font-bold text-brand-accent" id="modal-score">%80</div>
+          <div class="text-[11px] text-brand-textMuted">Öğrenme Oranı</div>
+        </div>
+        <div class="h-8 w-px bg-brand-border"></div>
+        <div>
+          <div class="text-2xl font-bold text-white" id="modal-cards">4 / 5</div>
+          <div class="text-[11px] text-brand-textMuted">Bilinen Kart</div>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="closeModal(true)" class="flex-1 py-3 bg-brand-border text-white rounded-xl text-xs font-semibold">Tekrar Çalış</button>
+        <button onclick="closeModal(false)" class="flex-1 py-3 bg-brand-accent text-black rounded-xl text-xs font-semibold">Dashboard'a Dön</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let activeFlashcards = [];
+    let currentCardIndex = 0;
+    let knownCount = 0;
+    let isFlipped = false;
+    let selectedDocId = 'all';
+
+    let totalElapsedSeconds = 0;
+    let currentSessionSeconds = 0;
+
+    // SAAT BAZLI DİNAMİK SELAMLAMA FONKSİYONU
+    function updateGreeting() {
+      const titleEl = document.getElementById('dynamic-greeting-title');
+      const subEl = document.getElementById('dynamic-greeting-subtitle');
+      if (!titleEl || !subEl) return;
+
+      const hour = new Date().getHours();
+      if (hour >= 5 && hour < 12) {
+        titleEl.textContent = "Good morning 🌅";
+        subEl.textContent = "Ready to start a productive day?";
+      } else if (hour >= 12 && hour < 17) {
+        titleEl.textContent = "Good afternoon ☀️";
+        subEl.textContent = "Keep up the great work today!";
+      } else if (hour >= 17 && hour < 22) {
+        titleEl.textContent = "Good evening 🌆";
+        subEl.textContent = "Ready to make some progress?";
+      } else {
+        titleEl.textContent = "Late night focus 🌙";
+        subEl.textContent = "Quiet hours for deep learning.";
+      }
+    }
+
+    // 10'LU MOTİVASYON VE GÖRSEL HAVUZU
+    const dynamicQuotes = [
+      {
+        tag: "LATE NIGHT CODING",
+        text: "“Kimse görmese de kendin için devam et.”",
+        img: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=800&auto=format&fit=crop"
+      },
+      {
+        tag: "NIGHT SHIFT",
+        text: "“Bir gün, bugün vazgeçmediğin için kendine teşekkür edeceksin.”",
+        img: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=800&auto=format&fit=crop"
+      },
+      {
+        tag: "STARRY NIGHT",
+        text: "“Hayatını değiştirmek için önce kendinle verdiğin savaşı kazan.”",
+        img: "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=800&auto=format&fit=crop"
+      },
+      {
+        tag: "LIMITLESS",
+        text: "“Sessizce büyü. Herkes sonucu gördüğünde, sürecini anlatmak zorunda kalma.”",
+        img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop"
+      },
+      {
+        tag: "SUNFLOWER DAWN",
+        text: "“Kendini başkalarının hayatıyla kıyaslamayı bıraktığında, kendi hikâyenin güzelliğini fark edeceksin.”",
+        img: "https://images.unsplash.com/photo-1597848212624-a19eb35e2651?q=80&w=800&auto=format&fit=crop"
+      },
+      {
+        tag: "SILENT WARRIOR",
+        text: "“Disiplin, motivasyonun olmadığı günlerde de hayaline sadık kalmaktır.”",
+        img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=800&auto=format&fit=crop"
+      },
+      {
+        tag: "STRATEGIC MIND",
+        text: "“Belki de kaybolmadın. Sadece eski hayatına artık sığmıyorsun.”",
+        img: "https://images.unsplash.com/photo-1529699211952-734e80c4d42b?q=80&w=800&auto=format&fit=crop"
+      },
+      {
+        tag: "UNBOTHERED MOOD",
+        text: "“Kim olduğuna karar ver ve ona dönüşmek için her gün küçük bir adım at.”",
+        img: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=800&auto=format&fit=crop"
+      },
+      {
+        tag: "FIRST STEP",
+        text: "“Bir şeylerin değişmesini bekleme. Değişmesi gereken şey senin ilk adımın olabilir.”",
+        img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800&auto=format&fit=crop"
+      },
+      {
+        tag: "OWN YOUR STORY",
+        text: "“Bu hayatı başkalarını etkilemek için değil, bir gün dönüp baktığında ‘iyi ki’ diyebilmek için yaşa.”",
+        img: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=800&auto=format&fit=crop"
+      }
+    ];
+
+    function randomizeQuoteCard() {
+      const cardEl = document.getElementById('quote-card');
+      const tagEl = document.getElementById('quote-tag');
+      const textEl = document.getElementById('quote-text');
+      if (!cardEl || !tagEl || !textEl) return;
+
+      const randomItem = dynamicQuotes[Math.floor(Math.random() * dynamicQuotes.length)];
+      cardEl.style.backgroundImage = `url('${randomItem.img}')`;
+      tagEl.textContent = randomItem.tag;
+      textEl.textContent = randomItem.text;
+    }
+
+    setInterval(() => {
+      totalElapsedSeconds++;
+      currentSessionSeconds++;
+      updateLiveDashboardTimer();
+    }, 1000);
+
+    function updateLiveDashboardTimer() {
+      const timeEl = document.getElementById('kpi-time');
+      if (!timeEl) return;
+      const h = Math.floor(totalElapsedSeconds / 3600);
+      const m = Math.floor((totalElapsedSeconds % 3600) / 60);
+      const s = totalElapsedSeconds % 60;
+      if (h > 0) {
+        timeEl.innerHTML = `${h}s <span class="text-base font-sans text-brand-accent font-semibold">${m}dk</span>`;
+      } else {
+        timeEl.innerHTML = `${m}dk <span class="text-base font-sans text-brand-accent font-semibold">${s}sn</span>`;
+      }
+    }
+
+    function loadDocDropdown() {
+      fetch('/api/documents')
+        .then(r => r.json())
+        .then(data => {
+          const sel = document.getElementById('flashcard-doc-select');
+          if (!sel) return;
+          sel.innerHTML = '<option value="all">📚 Tüm Yüklü Dersler</option>';
+          (data.documents || []).forEach(doc => {
+            const clean = doc.filename.replace(/\.[^/.]+$/, "");
+            sel.insertAdjacentHTML('beforeend', `<option value="${doc.id}">📄 ${clean}</option>`);
+          });
+          if (selectedDocId !== 'all') {
+            sel.value = selectedDocId;
+          }
+        });
+    }
+
+    function onDocFilterChange() {
+      selectedDocId = document.getElementById('flashcard-doc-select').value;
+      loadFlashcards(selectedDocId);
+    }
+
+    function openFlashcardsForDoc(docId) {
+      selectedDocId = docId.toString();
+      switchTab('flashcards');
+      const sel = document.getElementById('flashcard-doc-select');
+      if (sel) sel.value = selectedDocId;
+      loadFlashcards(selectedDocId);
+    }
+
+    function loadFlashcards(docId = 'all') {
+      currentSessionSeconds = 0;
+      const currentIds = activeFlashcards.map(c => c.id).join(',');
+      fetch(`/api/flashcards?doc_id=${docId}&exclude_ids=${currentIds}`)
+        .then(r => r.json())
+        .then(data => {
+          activeFlashcards = data.flashcards || [];
+          document.getElementById('deck-topic-title').textContent = data.topic ? data.topic.toUpperCase() : 'DERS KARTLARI';
+          currentCardIndex = 0;
+          knownCount = 0;
+          renderCard();
+        });
+    }
+
+    function reshuffleDeck() {
+      const btn = document.getElementById('btn-shuffle');
+      if (btn) btn.classList.add('opacity-50');
+
+      const currentIds = activeFlashcards.map(c => c.id);
+
+      fetch('/api/regenerate-flashcards', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ doc_id: selectedDocId, exclude_ids: currentIds })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (btn) btn.classList.remove('opacity-50');
+        activeFlashcards = data.flashcards || [];
+        currentCardIndex = 0;
+        knownCount = 0;
+        currentSessionSeconds = 0;
+        renderCard();
+      });
+    }
+
+    function renderCard() {
+      if (!activeFlashcards || activeFlashcards.length === 0) {
+        document.getElementById('card-content').innerHTML = "Henüz kart yok. Lütfen <strong>Documents</strong> sekmesinden PDF yükleyin.";
+        document.getElementById('card-counter').textContent = "Kart: 0 / 0";
+        return;
+      }
+      if (currentCardIndex >= activeFlashcards.length) {
+        finishDeck();
+        return;
+      }
+      isFlipped = false;
+      const card = activeFlashcards[currentCardIndex];
+      document.getElementById('card-label').textContent = "Soru (Cevap için tıkla)";
+      document.getElementById('card-content').textContent = card.q;
+      document.getElementById('card-counter').textContent = `Kart: ${currentCardIndex + 1} / ${activeFlashcards.length}`;
+    }
+
+    function flipCard() {
+      if (!activeFlashcards.length) return;
+      const card = activeFlashcards[currentCardIndex];
+      if (!isFlipped) {
+        document.getElementById('card-label').textContent = "Cevap / Açıklama";
+        document.getElementById('card-content').textContent = card.a;
+        isFlipped = true;
+      } else {
+        document.getElementById('card-label').textContent = "Soru (Cevap için tıkla)";
+        document.getElementById('card-content').textContent = card.q;
+        isFlipped = false;
+      }
+    }
+
+    function rateCard(isKnown) {
+      if (!activeFlashcards.length) return;
+      if (isKnown) knownCount++;
+      currentCardIndex++;
+      renderCard();
+    }
+
+    function finishDeck() {
+      const score = Math.round((knownCount / activeFlashcards.length) * 100);
+      let feedback = score >= 75 ? `Tebrikler! Konuları %${score} oranında öğrendin! 🌟` : `Konu hakimiyetin %${score}. Tekrar ederek pekiştirelim. 📚`;
+      document.getElementById('modal-score').textContent = `%${score}`;
+      document.getElementById('modal-cards').textContent = `${knownCount} / ${activeFlashcards.length}`;
+      document.getElementById('modal-feedback-text').textContent = feedback;
+      document.getElementById('feedback-modal').classList.remove('hidden');
+
+      fetch('/api/save-session', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          topic: selectedDocId === 'all' ? 'Genel Tekrar' : 'Ders Çalışması',
+          score: score,
+          known_count: knownCount,
+          total_cards: activeFlashcards.length,
+          duration_seconds: currentSessionSeconds
+        })
+      }).then(() => loadDashboardData());
+    }
+
+    function closeModal(restart) {
+      document.getElementById('feedback-modal').classList.add('hidden');
+      currentCardIndex = 0;
+      knownCount = 0;
+      currentSessionSeconds = 0;
+      renderCard();
+      if (!restart) switchTab('dashboard');
+    }
+
+    function uploadSelectedFiles() {
+      const fileInput = document.getElementById('fileInput');
+      const files = fileInput.files;
+      const status = document.getElementById('upload-status');
+      const btn = document.getElementById('upload-btn');
+
+      if (!files || files.length === 0) {
+        alert("Lütfen önce bilgisayarınızdan bir PDF dosyası seçin!");
+        return;
+      }
+
+      const formData = new FormData();
+      for (let i = 0; i < files.length; i++) {
+        formData.append('files', files[i]);
+      }
+
+      if (status) {
+        status.classList.remove('hidden');
+        status.textContent = "Yükleniyor ve işleniyor, lütfen bekleyin...";
+      }
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "İşleniyor...";
+      }
+
+      fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (status) status.classList.add('hidden');
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "Yükle →";
+        }
+        
+        if (res.success) {
+          fileInput.value = '';
+          loadDocuments();
+          loadDashboardData();
+          loadDocDropdown();
+          loadFlashcards(selectedDocId);
+          alert("Harika! " + res.uploaded.length + " yeni dosya başarıyla yüklendi.");
+        } else {
+          alert("Yükleme uyarısı: " + (res.error || "Hata oluştu"));
+        }
+      })
+      .catch(err => {
+        if (status) status.classList.add('hidden');
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "Yükle →";
+        }
+        alert("Bağlantı hatası: " + err.message);
+      });
+    }
+
+    function deleteDocument(docId, docName) {
+      if (!confirm(`"${docName}" belgesini ve bu belgeye ait tüm Flashcard'ları silmek istediğinizden emin misiniz?`)) {
+        return;
+      }
+
+      fetch(`/api/documents/${docId}`, { method: 'DELETE' })
+        .then(r => r.json())
+        .then(res => {
+          if (res.success) {
+            alert("Belge başarıyla silindi. ✅");
+            loadDocuments();
+            loadDashboardData();
+            loadDocDropdown();
+            selectedDocId = 'all';
+            loadFlashcards('all');
+          } else {
+            alert("Silme hatası: " + res.error);
+          }
+        })
+        .catch(err => alert("Bağlantı hatası: " + err));
+    }
+
+    function toggleNotifications(event) {
+      if (event) event.stopPropagation();
+      document.getElementById('notif-dropdown').classList.toggle('hidden');
+    }
+
+    document.addEventListener('click', (e) => {
+      const drop = document.getElementById('notif-dropdown');
+      if (drop && !drop.contains(e.target) && !e.target.closest('button[onclick*="toggleNotifications"]')) {
+        drop.classList.add('hidden');
+      }
+    });
+
+    function markAllNotificationsRead() {
+      document.getElementById('notif-badge')?.classList.add('hidden');
+      document.getElementById('notif-dropdown')?.classList.add('hidden');
+      alert("Bildirimler okundu!");
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('bg-brand-card', 'text-brand-accent', 'border', 'border-brand-border/60');
+        btn.classList.add('text-brand-textMuted');
+      });
+
+      const activeView = document.getElementById(`view-${tabId}`);
+      if (activeView) activeView.classList.remove('hidden');
+
+      const activeNav = document.getElementById(`nav-${tabId}`);
+      if (activeNav) {
+        activeNav.classList.add('bg-brand-card', 'text-brand-accent', 'border', 'border-brand-border/60');
+        activeNav.classList.remove('text-brand-textMuted');
+      }
+
+      document.getElementById('notif-dropdown')?.classList.add('hidden');
+      
+      if (tabId === 'flashcards') {
+        loadDocDropdown();
+        loadFlashcards(selectedDocId);
+      }
+      if (tabId === 'documents') loadDocuments();
+      if (tabId === 'dashboard') {
+        loadDashboardData();
+        randomizeQuoteCard();
+        updateGreeting();
+      }
+    }
+
+    function renderDashboard(data) {
+      document.getElementById('kpi-streak').innerHTML = `${data.study_streak} <span class="text-xs font-sans text-brand-textMuted font-normal">days</span>`;
+      document.getElementById('kpi-questions').textContent = data.questions_answered;
+      
+      let totalDbSeconds = ((data.study_time_hours || 0) * 3600) + ((data.study_time_mins || 0) * 60);
+      if (totalDbSeconds > totalElapsedSeconds) {
+        totalElapsedSeconds = totalDbSeconds;
+      }
+      updateLiveDashboardTimer();
+
+      const docs = data.documents || [];
+      const recBox = document.getElementById('dashboard-recommendation-box');
+      const coursesGrid = document.getElementById('dashboard-courses-grid');
+
+      if (docs.length === 0) {
+        recBox.innerHTML = `
+          <div class="bg-brand-card rounded-2xl p-8 border border-brand-border glowing-card">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+              <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-cardHigh text-brand-accent text-xs font-semibold uppercase mb-3">
+                  <span class="material-symbols-outlined text-sm">upload_file</span> Belge Bekleniyor
+                </div>
+                <h3 class="serif-title text-2xl text-white mb-2">Henüz Bir Ders Notu Yüklemediniz</h3>
+                <p class="text-brand-textMuted text-xs max-w-lg leading-relaxed">
+                  Dashboard konularınızın burada görünmesi için lütfen ilk PDF belgenizi yükleyin.
+                </p>
+              </div>
+              <button onclick="switchTab('documents')" class="px-6 py-3.5 rounded-xl bg-brand-accent text-black font-semibold text-xs hover:bg-brand-accentHover transition flex items-center gap-2 shadow-lg">
+                Belge Yükle &rarr;
+              </button>
+            </div>
+          </div>
+        `;
+        coursesGrid.innerHTML = `
+          <div class="col-span-2 p-8 border border-dashed border-brand-border rounded-2xl text-center text-brand-textMuted text-xs">
+            Yüklenmiş ders belgesi bulunmuyor. Yüklediğiniz PDF'ler otomatik olarak burada ders kartı olarak listelenecektir.
+          </div>
+        `;
+      } else {
+        const firstDoc = docs[0];
+        const cleanName = firstDoc.filename.replace(/\.[^/.]+$/, "");
+        recBox.innerHTML = `
+          <div class="bg-brand-card rounded-2xl p-8 border border-brand-border glowing-card">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+              <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-cardHigh text-brand-accent text-xs font-semibold uppercase mb-3">
+                  <span class="material-symbols-outlined text-sm">auto_stories</span> ÖNERİLEN ÇALIŞMA
+                </div>
+                <h3 class="serif-title text-2xl text-white mb-2">${cleanName}</h3>
+                <p class="text-brand-textMuted text-xs max-w-lg leading-relaxed">"${firstDoc.filename}" dersinizin sınav kartları hazır. Odaklanarak çalışmaya başlayabilirsiniz.</p>
+              </div>
+              <button onclick="openFlashcardsForDoc(${firstDoc.id})" class="px-6 py-3.5 rounded-xl bg-brand-accent text-black font-semibold text-xs hover:bg-brand-accentHover transition flex items-center gap-2 shadow-lg">
+                Kartları Çöz &rarr;
+              </button>
+            </div>
+          </div>
+        `;
+
+        coursesGrid.innerHTML = docs.map((doc, idx) => {
+          const name = doc.filename.replace(/\.[^/.]+$/, "");
+          return `
+            <div class="bg-brand-card rounded-2xl p-6 border border-brand-border glowing-card flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between gap-3 mb-3">
+                  <div class="bg-brand-cardHigh p-2.5 rounded-xl text-brand-accent"><span class="material-symbols-outlined">folder_open</span></div>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-brand-border text-brand-accent">${doc.type}</span>
+                </div>
+                <h4 class="font-semibold text-white truncate text-base">${name}</h4>
+                <p class="text-xs text-brand-textMuted mt-0.5">${doc.pages} Sayfa &bull; Hazır</p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-brand-border flex items-center justify-between">
+                <button onclick="openFlashcardsForDoc(${doc.id})" class="text-xs text-brand-accent hover:underline font-medium flex items-center gap-1">
+                  <span class="material-symbols-outlined text-xs">style</span> Flashcard Çalış
+                </button>
+                <button onclick="switchTab('aitutor')" class="text-xs text-brand-textMuted hover:text-white">
+                  Soru Sor &rarr;
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function loadDashboardData() {
+      fetch('/api/dashboard').then(r => r.json()).then(data => renderDashboard(data));
+    }
+
+    function loadDocuments() {
+      fetch('/api/documents').then(r => r.json()).then(data => {
+        const grid = document.getElementById('documents-grid');
+        grid.innerHTML = '';
+        if (!data.documents || data.documents.length === 0) {
+          grid.innerHTML = `<div class="col-span-3 text-center py-10 text-brand-textMuted text-xs">Henüz yüklenmiş bir PDF bulunmuyor.</div>`;
+        } else {
+          data.documents.forEach(doc => {
+            const clean = doc.filename.replace(/\.[^/.]+$/, "");
+            grid.insertAdjacentHTML('beforeend', `
+              <div class="bg-brand-card rounded-2xl p-5 border border-brand-border glowing-card flex flex-col justify-between">
+                <div>
+                  <div class="flex items-start justify-between">
+                    <div class="p-3 bg-brand-cardHigh rounded-xl text-brand-accent"><span class="material-symbols-outlined">description</span></div>
+                    <div class="flex items-center gap-2">
+                      <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-brand-border text-brand-accent">${doc.type}</span>
+                      <button onclick="deleteDocument(${doc.id}, '${clean}')" title="Belgeyi Sil" class="w-7 h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center transition">
+                        <span class="material-symbols-outlined text-sm">delete</span>
+                      </button>
+                    </div>
+                  </div>
+                  <h4 class="font-semibold text-white mt-4 truncate">${clean}</h4>
+                  <p class="text-xs text-brand-textMuted mt-1">${doc.pages} Sayfa &bull; Hazır</p>
+                </div>
+                <div class="mt-4 pt-3 border-t border-brand-border flex items-center justify-between text-xs">
+                  <button onclick="openFlashcardsForDoc(${doc.id})" class="text-brand-accent hover:underline font-semibold flex items-center gap-1">
+                    <span class="material-symbols-outlined text-xs">style</span> Kartları Aç
+                  </button>
+                  <button onclick="switchTab('aitutor')" class="text-brand-textMuted hover:text-white">Soru Sor &rarr;</button>
+                </div>
+              </div>
+            `);
+          });
+        }
+      });
+    }
+
+    function handleProfileUpdate(e) {
+      e.preventDefault();
+      const name = document.getElementById('input-name').value;
+      const email = document.getElementById('input-email').value;
+      document.getElementById('sidebar-username').textContent = name;
+      document.getElementById('profile-card-name').textContent = name;
+      document.getElementById('profile-card-email').textContent = email;
+      const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      document.getElementById('sidebar-avatar').textContent = initials || 'CE';
+      document.getElementById('profile-card-initials').textContent = initials || 'CE';
+      alert("Profil bilgileri güncellendi! ✅");
+    }
+
+    function sendTutorQuestion() {
+      const input = document.getElementById('tutor-input');
+      const text = input.value.trim();
+      if (!text) return;
+      
+      const chat = document.getElementById('chat-messages');
+      chat.insertAdjacentHTML('beforeend', `<div class="flex justify-end"><div class="bg-brand-accent text-black p-3.5 rounded-2xl max-w-xl text-xs font-medium">${text}</div></div>`);
+      input.value = '';
+      chat.scrollTop = chat.scrollHeight;
+
+      fetch('/api/ask', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ question: text })
+      })
+      .then(r => r.json())
+      .then(res => {
+        let sourcesHtml = res.sources && res.sources.length ? `<div class="mt-2 text-xs text-brand-accent flex items-center gap-1"><span class="material-symbols-outlined text-xs">menu_book</span> Kaynak: ${res.sources.join(', ')}</div>` : '';
+        chat.insertAdjacentHTML('beforeend', `
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-full bg-brand-accent/20 text-brand-accent flex items-center justify-center text-xs font-bold">AI</div>
+            <div class="bg-[#171513] border border-brand-border p-4 rounded-2xl max-w-xl text-xs text-stone-200 leading-relaxed">
+              ${res.answer.replace(/\n/g, '<br>')}
+              ${sourcesHtml}
+            </div>
+          </div>
+        `);
+        chat.scrollTop = chat.scrollHeight;
+      });
+    }
+
+    window.onload = () => {
+      loadDocDropdown();
+      loadFlashcards();
+      loadDocuments();
+      loadDashboardData();
+      randomizeQuoteCard();
+      updateGreeting();
+    };
+  </script>
+</body>
+</html>

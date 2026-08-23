@@ -1,0 +1,29 @@
+BÖLÜM 1: TEMEL SIRALAMA ALGORİTMALARI VE KARMAŞIKLIK ANALİZİ
+
+1. Insertion Sort (Eklemeli Sıralama)
+• Çalışma Prensibi: Diziyi sıralı ve sırasız iki alt diziye ayırır. Sırasız bölümden alınan eleman, sıralı bölümdeki doğru konumuna kaydırmalar yapılarak yerleştirilir.
+• Zaman Karmaşıklığı: 
+  - En İyi Durum (Best Case): O(n) (Dizi zaten sıralıysa)
+  - Ortalama (Average Case): O(n^2)
+  - En Kötü Durum (Worst Case): O(n^2) (Dizi ters sıralıysa)
+• Alan Karmaşıklığı: O(1) (In-place çalışır)
+• Kararlılık (Stability): Kararlıdır (Stable).
+
+2. Merge Sort (Birleştirmeli Sıralama)
+• Çalışma Prensibi: Böl ve Yönet (Divide and Conquer) paradigmasını kullanır. Dizi özyinelemeli olarak 1 eleman kalana kadar ikiye bölünür, ardından sıralı biçimde birleştirilir (merge).
+• Zaman Karmaşıklığı: Her durumda (Best, Average, Worst) O(n log n) garantisi sunar.
+• Alan Karmaşıklığı: O(n) ek bellek gerektirir (Out-of-place).
+• Kararlılık: Kararlıdır (Stable). Büyük veri setleri ve bağlı listeler (Linked List) için idealdir.
+
+3. Quick Sort (Hızlı Sıralama)
+• Çalışma Prensibi: Bir pivot eleman seçilir. Dizide pivottan küçük olanlar soluna, büyük olanlar sağına yerleştirilir (Partitioning). Alt diziler özyinelemeli sıralanır.
+• Zaman Karmaşıklığı:
+  - En İyi ve Ortalama Durum: O(n log n)
+  - En Kötü Durum: O(n^2) (Pivotun sürekli en küçük veya en büyük eleman seçilmesi durumunda)
+• Alan Karmaşıklığı: O(log n) (Özyineleme yığını için).
+• Kararlılık: Kararsızdır (Unstable). Bellek içi dizilerde en hızlı çalışan pratik algoritmadır.
+
+4. Heap Sort (Yığın Sıralaması)
+• Çalışma Prensibi: Diziyi bir Max-Heap ikili ağaç yapısına dönüştürür. Kök eleman (en büyük) en sona atılır ve kalan ağaç yeniden düzenlenir (Heapify).
+• Zaman Karmaşıklığı: Her durumda O(n log n).
+• Alan Karmaşıklığı: O(1) ek bellek.

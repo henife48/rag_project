@@ -1,0 +1,18 @@
+BÖLÜM 4: BELLEK YÖNETİMİ, SAYFALAMA VE SANAL BELLEK
+
+1. Sanal Bellek (Virtual Memory) ve Sayfalama (Paging)
+• Temel Amaç: Fiziksel RAM kapasitesinden daha büyük programların kesintisiz çalışabilmesini sağlamak ve bellek koruması sunmak.
+• Sayfa (Page): Mantıksal adres uzayının bölündüğü sabit boyutlu bellek blokları (Genelde 4 KB).
+• Çerçeve (Frame): Fiziksel RAM'in bölündüğü sabit boyutlu bloklar.
+
+2. Adres Dönüşümü (MMU ve Page Table)
+• Mantıksal Adres ikiye ayrılır: Sayfa Numarası (p) ve Ofset (d).
+• Bellek Yönetim Birimi (MMU), Sayfa Tablosunu (Page Table) kullanarak mantıksal sayfa numarasını fiziksel çerçeve numarasına dönüştürür.
+• TLB (Translation Lookaside Buffer): Adres dönüşümünü hızlandırmak için MMU içinde bulunan çok hızlı donanımsal önbellektir.
+
+3. Sayfa Hatası (Page Fault) ve Değiştirme Politikaları
+• Page Fault: Erişilmek istenen sayfanın fiziksel RAM'de bulunmayıp ikincil depolamada (Disk / Swap) olması durumunda tetiklenen donanımsal kesmedir.
+• Sayfa Değiştirme Algoritmaları:
+  - FIFO: İlk gelen sayfa ilk atılır (Belady Anomalisi görülebilir).
+  - LRU (Least Recently Used): En uzun süredir kullanılmayan sayfayı disk belleğine taşır.
+  - Optimal (OPT): Gelecekte en uzun süre kullanılmayacak sayfayı atar (Teorik referanstır).
